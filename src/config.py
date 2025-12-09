@@ -1,0 +1,15 @@
+import pygame
+
+# Dimensões e FPS do jogo
+LARGURA_TELA = 500
+ALTURA_TELA = 800
+FPS = 60
+
+DIST_CANOS = 200
+VEL_CANOS = 7
+FORC_PULO = -15
+GRAVIDADE = 2.5
+
+# Cores
+WHITE = (255, 255, 255)
+COR_FUNDO = (135, 206, 235)

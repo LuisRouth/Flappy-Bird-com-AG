@@ -3,6 +3,8 @@ import random
 from src.config import *
 
 class Bird:
+    IMG = None
+    
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -12,6 +14,11 @@ class Bird:
         self.alive = True
         self.brain = None
         self.fitness = 0
+        
+        if Bird.IMG:
+            self.rect = pygame.Rect(x, y, Bird.IMG.get_width(), Bird.IMG.get_height())
+        else:
+            self.rect = pygame.Rect(x, y, 34, 24)
         
     def jump(self):
         self.vel = FORC_PULO
@@ -31,7 +38,10 @@ class Bird:
             self.alive = False
             
     def draw(self, win):
-        pygame.draw.rect(win, (255, 0, 0), self.rect)
+        if Bird.IMG:
+            win.blit(Bird.IMG, (self.x, self.y))
+        else:
+            pygame.draw.rect(win, (255, 0, 0), self.rect)
         
 class Pipe:
     def __init__(self, x):

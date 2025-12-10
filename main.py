@@ -16,7 +16,7 @@ def desenhar_botao(win, rect, cor_interna):
     
     pygame.draw.rect(win, cor_interna, rect_interno)
     pygame.draw.rect(win, (0, 0, 0), rect_interno, 1)
-    
+
 def tela_selecao(win, font):
     selecionado = False
     cor_escolhida_index = 0
@@ -39,10 +39,10 @@ def tela_selecao(win, font):
     while not selecionado:
         win.fill(COR_FUNDO)
         
-        texto = font.render("Escolha a Cor do Pássaro", True, WHITE)
+        texto = font.render("Escolha a Skin da IA", True, WHITE)
         win.blit(texto, (LARGURA_TELA//2 - texto.get_width()//2, 100))
         
-        texto_sub = font.render("A IA aprenderá com esta skin", True, (50, 50, 50))
+        texto_sub = font.render("Clique em uma cor para iniciar", True, (50, 50, 50))
         win.blit(texto_sub, (LARGURA_TELA//2 - texto_sub.get_width()//2, 150))
         
         mouse_pos = pygame.mouse.get_pos()
@@ -52,7 +52,7 @@ def tela_selecao(win, font):
             desenhar_botao(win, rect, cor)
             
             if rect.collidepoint(mouse_pos):
-                pygame.draw.rect(win, (255, 255, 255), rect, 3)
+                pygame.draw.rect(win, WHITE, rect, 3)
                 if click[0]:
                     cor_escolhida_index = index
                     selecionado = True
@@ -70,27 +70,27 @@ def main():
     pygame.init()
     pygame.mixer.init()
     win = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
-    pygame.display.set_caption("Flappy IA - Genetic Algorithm")
+    pygame.display.set_caption("Flappy IA - Genetic Evolution")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("comicsans", 30)
     
     indice_skin = tela_selecao(win, font)
     
     nomes_arquivos = [
-        "BirdR.png",   # Vermelho
-        "BirdG.png",   # Verde
-        "BirdB.png",   # Azul
-        "BirdY.png",   # Amarelo
-        "BirdO.png",   # Laranja
-        "BirdPu.png",  # Roxo
-        "BirdC.png",   # Ciano
-        "BirdPi.png"   # Rosa
+        "BirdB.png",
+        "BirdC.png",
+        "BirdG.png",
+        "BirdO.png",
+        "BirdPi.png",
+        "BirdPu.png",
+        "BirdR.png",
+        "BirdY.png"
     ]
     
-    nome_arquivo_escolhido = nomes_arquivos[indice_skin]
-    caminho_imagem = os.path.join("assets", "Birds", nome_arquivo_escolhido)
+    nome_arquivo = nomes_arquivos[indice_skin]
+    caminho_imagem = os.path.join("assets", "Birds", nome_arquivo)
     
-    print(f"Carregando skin: {nome_arquivo_escolhido}")
+    print(f"Iniciando simulação com skin: {nome_arquivo}")
     
     try:
         pygame.mixer.music.load("musica.mp3")
@@ -106,13 +106,24 @@ def main():
         imagem_carregada.fill(CORES_SKIN[indice_skin])
         
     Bird.IMG = imagem_carregada
+        img = pygame.image.load(caminho_imagem).convert_alpha()
+        Bird.IMG = pygame.transform.scale(img, (34, 24))
+    except Exception as e:
+        print(f"Erro ao carregar imagem {caminho_imagem}: {e}")
+        Bird.IMG = None
 
-    ga = EvolutionManager(pop_size=20)
+    ga = EvolutionManager(pop_size=50)
     birds = ga.create_population()
     saved_birds = []
     
     pipes = [Pipe(600)]
     score = 0
+    
+    try:
+        bg_img = pygame.image.load(os.path.join("assets", "Background.png"))
+        bg_img = pygame.transform.scale(bg_img, (LARGURA_TELA, ALTURA_TELA))
+    except:
+        bg_img = None
 
     running = True
     while running:
@@ -123,15 +134,24 @@ def main():
                 running = False
                 pygame.quit()
                 quit()
+
+        if len(birds) == 0:
+            print(f"Geração {ga.generation} extinta. Evoluindo...")
+            birds = ga.next_generation(saved_birds)
+            saved_birds = []
+            pipes = [Pipe(600)]
+            score = 0
+
         rem = []
         add_pipe = False
         for pipe in pipes:
             pipe.move()
             if pipe.x + pipe.top_rect.width < 0:
                 rem.append(pipe)
-            if not pipe.passed and pipe.x < 200:
+            if not pipe.passed and pipe.x < birds[0].x if birds else 0: 
                 pipe.passed = True
                 add_pipe = True
+
         if add_pipe:
             score += 1
             pipes.append(Pipe(600))
@@ -139,9 +159,44 @@ def main():
         for r in rem:
             pipes.remove(r)
 
-        win.fill(COR_FUNDO)
+        for bird in birds:
+            bird.fitness += 0.1
+            bird.move()
+            decide_action(bird, pipes, LARGURA_TELA, ALTURA_TELA)
+
+        for i in range(len(birds) - 1, -1, -1):
+            bird = birds[i]
+            colidiu = False
+            
+            for pipe in pipes:
+                if pipe.collide(bird):
+                    colidiu = True
+                    break
+            
+            if colidiu or not bird.alive:
+                bird.fitness -= 1
+                saved_birds.append(bird)
+                birds.pop(i)
+
+        if bg_img:
+            win.blit(bg_img, (0,0))
+        else:
+            win.fill(COR_FUNDO)
+
         for pipe in pipes:
-            pipe.draw(win) 
+            pipe.draw(win)
+            
+        for bird in birds:
+            bird.draw(win)
+            
+        text_gen = font.render(f"Gen: {ga.generation}", 1, WHITE)
+        text_alive = font.render(f"Vivos: {len(birds)}", 1, WHITE)
+        text_score = font.render(f"Score: {score}", 1, WHITE)
+        
+        win.blit(text_gen, (10, 10))
+        win.blit(text_alive, (10, 50))
+        win.blit(text_score, (10, 90))
+
         pygame.display.update()
 
 if __name__ == "__main__":

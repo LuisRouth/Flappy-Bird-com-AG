@@ -28,7 +28,25 @@ def main():
                 pygame.quit()
                 quit()
 
+        rem = []
+        add_pipe = False
+        for pipe in pipes:
+            pipe.move()
+            if pipe.x + pipe.top_rect.width < 0:
+                rem.append(pipe)
+            if not pipe.passed and pipe.x < 200:
+                pipe.passed = True
+                add_pipe = True
+        if add_pipe:
+            score += 1
+            pipes.append(Pipe(600))
+
+        for r in rem:
+            pipes.remove(r)
+
         win.fill(COR_FUNDO)
+        for pipe in pipes:
+            pipe.draw(win) 
         pygame.display.update()
 
 if __name__ == "__main__":

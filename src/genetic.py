@@ -26,3 +26,27 @@ class EvolutionManager:
         mutate_arr(brain.w_ho)
         mutate_arr(brain.bias_h)
         mutate_arr(brain.bias_o)
+    
+    def next_generation(self, birds):
+        self.generation += 1
+        birds.sort(key=lambda x: x.fitness, reverse=True)
+        
+        new_birds = []
+        for i in range(2):
+            if i < len(birds):
+                best = Bird(230, 350)
+                best.brain = birds[i].brain 
+                new_birds.append(best)
+        while len(new_birds) < self.pop_size:
+            limit = min(10, len(birds))
+            parent = random.choice(birds[:limit])
+            child = Bird(230, 350)
+            child.brain = Brain(3, 4, 1)
+            child.brain.w_ih = parent.brain.w_ih.copy()
+            child.brain.w_ho = parent.brain.w_ho.copy()
+            child.brain.bias_h = parent.brain.bias_h.copy()
+            child.brain.bias_o = parent.brain.bias_o.copy()
+            self.mutate(child.brain)
+            new_birds.append(child)
+            
+        return new_birds

@@ -68,7 +68,11 @@ def tela_selecao(win, font):
 
 def main():
     pygame.init()
-    pygame.mixer.init()
+    try:
+        pygame.mixer.init()
+    except:
+        print("Erro ao inicializar mixer de áudio.")
+
     win = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
     pygame.display.set_caption("Flappy IA - Genetic Evolution")
     clock = pygame.time.Clock()
@@ -77,14 +81,8 @@ def main():
     indice_skin = tela_selecao(win, font)
     
     nomes_arquivos = [
-        "BirdB.png",
-        "BirdC.png",
-        "BirdG.png",
-        "BirdO.png",
-        "BirdPi.png",
-        "BirdPu.png",
-        "BirdR.png",
-        "BirdY.png"
+        "BirdB.png", "BirdC.png", "BirdG.png", "BirdO.png",
+        "BirdPi.png", "BirdPu.png", "BirdR.png", "BirdY.png"
     ]
     
     nome_arquivo = nomes_arquivos[indice_skin]
@@ -93,24 +91,23 @@ def main():
     print(f"Iniciando simulação com skin: {nome_arquivo}")
     
     try:
-        pygame.mixer.music.load("musica.mp3")
-        pygame.mixer.music.play(-1)
-        pygame.mixer.music.set_volume(0.5)
-        print("Música iniciada.")
-        imagem_carregada = pygame.image.load(caminho_imagem).convert_alpha()
-        imagem_carregada = pygame.transform.scale(imagem_carregada, (34, 24))
+        if os.path.exists("musica.mp3"):
+            pygame.mixer.music.load("musica.mp3")
+            pygame.mixer.music.play(-1)
+            pygame.mixer.music.set_volume(0.5)
+            print("Música iniciada.")
+        if os.path.exists(caminho_imagem):
+            imagem_carregada = pygame.image.load(caminho_imagem).convert_alpha()
+            Bird.IMG = pygame.transform.scale(imagem_carregada, (34, 24))
+        else:
+            raise FileNotFoundError(f"Imagem não encontrada: {caminho_imagem}")
+
     except Exception as e:
-        print(f"Erro ao carregar música.mp3: {e}")
-        print(f"Erro ao carregar {caminho_imagem}: {e}")
-        imagem_carregada = pygame.Surface((34, 24))
-        imagem_carregada.fill(CORES_SKIN[indice_skin])
-        
-    Bird.IMG = imagem_carregada
-        img = pygame.image.load(caminho_imagem).convert_alpha()
-        Bird.IMG = pygame.transform.scale(img, (34, 24))
-    except Exception as e:
-        print(f"Erro ao carregar imagem {caminho_imagem}: {e}")
-        Bird.IMG = None
+        print(f"Aviso de Assets: {e}")
+        surface_fallback = pygame.Surface((34, 24))
+        surface_fallback.fill(CORES_SKIN[indice_skin])
+        Bird.IMG = surface_fallback
+    # ------------------------------------------
 
     ga = EvolutionManager(pop_size=50)
     birds = ga.create_population()
@@ -119,11 +116,14 @@ def main():
     pipes = [Pipe(600)]
     score = 0
     
+    bg_img = None
     try:
-        bg_img = pygame.image.load(os.path.join("assets", "Background.png"))
-        bg_img = pygame.transform.scale(bg_img, (LARGURA_TELA, ALTURA_TELA))
-    except:
-        bg_img = None
+        caminho_bg = os.path.join("assets", "Background.png")
+        if os.path.exists(caminho_bg):
+            bg_img = pygame.image.load(caminho_bg).convert()
+            bg_img = pygame.transform.scale(bg_img, (LARGURA_TELA, ALTURA_TELA))
+    except Exception as e:
+        print(f"Erro no background: {e}")
 
     running = True
     while running:
@@ -148,9 +148,10 @@ def main():
             pipe.move()
             if pipe.x + pipe.top_rect.width < 0:
                 rem.append(pipe)
-            if not pipe.passed and pipe.x < birds[0].x if birds else 0: 
-                pipe.passed = True
-                add_pipe = True
+            if not pipe.passed and len(birds) > 0:
+                if pipe.x < birds[0].x:
+                    pipe.passed = True
+                    add_pipe = True
 
         if add_pipe:
             score += 1
@@ -163,7 +164,6 @@ def main():
             bird.fitness += 0.1
             bird.move()
             decide_action(bird, pipes, LARGURA_TELA, ALTURA_TELA)
-
         for i in range(len(birds) - 1, -1, -1):
             bird = birds[i]
             colidiu = False

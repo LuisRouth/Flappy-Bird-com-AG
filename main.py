@@ -68,6 +68,7 @@ def tela_selecao(win, font):
 
 def main():
     pygame.init()
+    pygame.mixer.init()
     win = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
     pygame.display.set_caption("Flappy IA - Genetic Evolution")
     clock = pygame.time.Clock()
@@ -92,6 +93,19 @@ def main():
     print(f"Iniciando simulação com skin: {nome_arquivo}")
     
     try:
+        pygame.mixer.music.load("musica.mp3")
+        pygame.mixer.music.play(-1)
+        pygame.mixer.music.set_volume(0.5)
+        print("Música iniciada.")
+        imagem_carregada = pygame.image.load(caminho_imagem).convert_alpha()
+        imagem_carregada = pygame.transform.scale(imagem_carregada, (34, 24))
+    except Exception as e:
+        print(f"Erro ao carregar música.mp3: {e}")
+        print(f"Erro ao carregar {caminho_imagem}: {e}")
+        imagem_carregada = pygame.Surface((34, 24))
+        imagem_carregada.fill(CORES_SKIN[indice_skin])
+        
+    Bird.IMG = imagem_carregada
         img = pygame.image.load(caminho_imagem).convert_alpha()
         Bird.IMG = pygame.transform.scale(img, (34, 24))
     except Exception as e:

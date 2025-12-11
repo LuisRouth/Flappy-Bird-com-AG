@@ -84,6 +84,8 @@ def main():
         bg = pygame.image.load(os.path.join("assets", "Background.png")).convert()
         bg = pygame.transform.scale(bg, (LARGURA_TELA, ALTURA_TELA))
     except: bg = None
+    music_on = True
+    rect_botao_musica = None
 
     running = True
     while running:
@@ -91,6 +93,17 @@ def main():
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT: running = False; pygame.quit(); quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    if rect_botao_musica and rect_botao_musica.collidepoint(event.pos):
+                        music_on = not music_on
+                        try:
+                            if music_on:
+                                pygame.mixer.music.unpause()
+                            else:
+                                pygame.mixer.music.pause()
+                        except: pass
+
             if event.type == pygame.KEYDOWN and event.key == pygame.K_k:
                 for b in birds: 
                     b.fitness -= 5
@@ -119,7 +132,7 @@ def main():
                 b.fitness += 5 
                 
             if score > recorde_canos: recorde_canos = score
-            velocidade_atual = min(velocidade_atual + 0.5, 15)
+            velocidade_atual = min(velocidade_atual + 0.5, 12)
             pipes.append(Pipe(600))
 
         for r in rem: pipes.remove(r)
@@ -127,9 +140,7 @@ def main():
         for bird in birds:
             bird.fitness += 0.5
             bird.move()
-            
             pulou = decide_action(bird, pipes, LARGURA_TELA, ALTURA_TELA)
-            
             if pulou:
                 bird.fitness -= 0.5 
         
@@ -138,7 +149,6 @@ def main():
             colidiu = False
             for p in pipes:
                 if p.collide(b): colidiu = True; break
-            
             if colidiu or not b.alive:
                 b.fitness -= 2
                 saved_birds.append(b)
@@ -152,7 +162,7 @@ def main():
         for b in birds: b.draw(win)
         
         best = birds[0] if birds else None
-        draw_dashboard(win, best, ga.generation, len(birds), score, recorde_canos, velocidade_atual)
+        rect_botao_musica = draw_dashboard(win, best, ga.generation, len(birds), score, recorde_canos, velocidade_atual, music_on)
 
         pygame.display.update()
 

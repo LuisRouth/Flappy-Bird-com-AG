@@ -19,7 +19,7 @@ def desenhar_cerebro_simplificado(win, brain, x, y):
         for h in range(cols):
             weight = brain.w_ih[i][h]
             cor = VERDE_NEON if weight > 0 else VERMELHO_NEON
-            width = 1 if abs(weight) < 0.5 else 3 
+            width = 1 if abs(weight) < 0.5 else 2 
             pygame.draw.line(win, cor, (layer_in_x, y_nodes[i]), (layer_hid_x, y + 20 + (h * 20)), width)
 
     rows, cols = brain.w_ho.shape
@@ -36,7 +36,8 @@ def desenhar_cerebro_simplificado(win, brain, x, y):
 
     pygame.draw.circle(win, WHITE, (layer_out_x, y + 40), 8)
     win.blit(FONTE_TITULO.render("PULAR", 1, WHITE), (layer_out_x + 15, y + 30))
-def draw_dashboard(win, bird, generation, alive_count, score, recorde, velocidade):
+
+def draw_dashboard(win, bird, generation, alive_count, score, recorde, velocidade, music_on):
     rect_painel = pygame.Rect(LARGURA_TELA, 0, LARGURA_PAINEL, ALTURA_TELA)
     pygame.draw.rect(win, COR_PAINEL, rect_painel)
     pygame.draw.line(win, WHITE, (LARGURA_TELA, 0), (LARGURA_TELA, ALTURA_TELA), 2)
@@ -79,11 +80,22 @@ def draw_dashboard(win, bird, generation, alive_count, score, recorde, velocidad
         else:
             pygame.draw.rect(win, VERMELHO_NEON, (mid_x-fill_w, cursor_y+2, fill_w, 16))
 
+    y_music = ALTURA_TELA - 130
+    rect_music = pygame.Rect(base_x + 30, y_music, LARGURA_PAINEL - 80, 40)
+    
+    cor_btn = VERDE_NEON if music_on else VERMELHO_NEON
+    texto_btn = "MÚSICA: ON" if music_on else "MÚSICA: OFF"
+    
+    pygame.draw.rect(win, cor_btn, rect_music)
+    pygame.draw.rect(win, WHITE, rect_music, 2)
+    
+    lbl = FONTE_TITULO.render(texto_btn, 1, (0,0,0))
+    win.blit(lbl, (rect_music.centerx - lbl.get_width()//2, rect_music.centery - lbl.get_height()//2))
     y_inst = ALTURA_TELA - 60
-    pygame.draw.rect(win, (0,0,0), (base_x, y_inst - 10, LARGURA_PAINEL-20, 50)) 
+    pygame.draw.rect(win, (0,0,0), (base_x, y_inst - 5, LARGURA_PAINEL-20, 50)) 
     
     instrucao_1 = FONTE_TITULO.render("[K] MATAR TODOS", 1, VERMELHO_NEON)
     win.blit(instrucao_1, (base_x + 30, y_inst))
-    
     instrucao_2 = FONTE_TEXTO.render("(Pula para próxima geração)", 1, WHITE)
     win.blit(instrucao_2, (base_x + 30, y_inst + 25))
+    return rect_music

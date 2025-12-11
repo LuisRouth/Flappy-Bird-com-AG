@@ -65,7 +65,6 @@ def main():
             pygame.mixer.music.load("musica.mp3"); pygame.mixer.music.play(-1); pygame.mixer.music.set_volume(0.5)
         if os.path.exists(caminho_imagem):
             img = pygame.image.load(caminho_imagem).convert_alpha()
-            # AQUI ESTÁ O TAMANHO QUE VOCÊ PEDIU (34, 24)
             Bird.IMG = pygame.transform.scale(img, (34, 24))
         else: raise FileNotFoundError
     except:
@@ -73,7 +72,7 @@ def main():
         s.fill(CORES_SKIN[indice_skin])
         Bird.IMG = s
 
-    ga = EvolutionManager(pop_size=50)
+    ga = EvolutionManager(pop_size=TAMANHO_POPULACAO)
     birds = ga.create_population()
     saved_birds = []
     pipes = [Pipe(600)]
@@ -94,7 +93,7 @@ def main():
             if event.type == pygame.QUIT: running = False; pygame.quit(); quit()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_k:
                 for b in birds: 
-                    b.fitness -= 1
+                    b.fitness -= 5
                     saved_birds.append(b)
                 birds.clear()
 
@@ -110,12 +109,15 @@ def main():
         for pipe in pipes:
             pipe.move(velocidade_atual)
             if pipe.x + pipe.top_rect.width < 0: rem.append(pipe)
-            if not pipe.passed and len(birds) > 0 and pipe.x < birds[0].x:
+            if not pipe.passed and len(birds) > 0 and (pipe.x + 70) < birds[0].x:
                 pipe.passed = True
                 add_pipe = True
 
         if add_pipe:
             score += 1
+            for b in birds:
+                b.fitness += 5 
+                
             if score > recorde_canos: recorde_canos = score
             velocidade_atual = min(velocidade_atual + 0.5, 15)
             pipes.append(Pipe(600))
@@ -123,17 +125,22 @@ def main():
         for r in rem: pipes.remove(r)
 
         for bird in birds:
-            bird.fitness += 0.1
+            bird.fitness += 0.5
             bird.move()
-            decide_action(bird, pipes, LARGURA_TELA, ALTURA_TELA)
+            
+            pulou = decide_action(bird, pipes, LARGURA_TELA, ALTURA_TELA)
+            
+            if pulou:
+                bird.fitness -= 0.5 
         
         for i in range(len(birds)-1, -1, -1):
             b = birds[i]
             colidiu = False
             for p in pipes:
                 if p.collide(b): colidiu = True; break
+            
             if colidiu or not b.alive:
-                b.fitness -= 1
+                b.fitness -= 2
                 saved_birds.append(b)
                 birds.pop(i)
 

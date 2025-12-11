@@ -10,6 +10,7 @@ class Bird:
         self.y = y
         self.vel = 0
         self.tick_count = 0
+        self.tilt = 0
         self.rect = pygame.Rect(x, y, 34, 24)
         self.alive = True
         self.brain = None
@@ -19,24 +20,30 @@ class Bird:
         
     def jump(self):
         self.vel = FORC_PULO
-        self.tick_count = 0
         
     def move(self):
         self.tick_count += 1
-        displacement = self.vel * self.tick_count + GRAVIDADE * (self.tick_count ** 2)
         
-        if displacement >= 16:
-            displacement = 16
-            
-        self.y += displacement
+        self.vel += GRAVIDADE
+        if self.vel > 10:
+            self.vel = 10
+        self.y += self.vel
+        if self.vel < 0 or self.y < (self.y - self.vel + 50): 
+            if self.tilt < 25:
+                self.tilt = 25
+        else:
+            if self.tilt > -90:
+                self.tilt -= 3
+                
         self.rect.y = int(self.y)
-        
-        if self.y > ALTURA_TELA - 50 or self.y < 0:
+        if self.y > ALTURA_TELA - 20 or self.y < 0:
             self.alive = False
             
     def draw(self, win):
         if Bird.IMG:
-            win.blit(Bird.IMG, (self.x, self.y))
+            rotated_image = pygame.transform.rotate(Bird.IMG, self.tilt)
+            new_rect = rotated_image.get_rect(center=self.rect.center)
+            win.blit(rotated_image, new_rect.topleft)
         else:
             pygame.draw.rect(win, (255, 0, 0), self.rect)
         
@@ -50,7 +57,7 @@ class Pipe:
         self.set_height()
         
     def set_height(self):
-        self.height = random.randrange(50, 450)
+        self.height = random.randrange(50, ALTURA_TELA - DIST_CANOS - 50)
         self.top = self.height - DIST_CANOS
         self.bottom = self.height
         
@@ -59,14 +66,17 @@ class Pipe:
         
     def move(self, vel):
         self.x -= vel
-        self.top_rect.x = self.x
-        self.bottom_rect.x = self.x
+        self.top_rect.x = int(self.x)
+        self.bottom_rect.x = int(self.x)
         
     def collide(self, bird):
-        if bird.rect.colliderect(self.top_rect) or bird.rect.colliderect(self.bottom_rect):
+        bird_rect_ajustado = bird.rect.inflate(-10, -10)
+        if bird_rect_ajustado.colliderect(self.top_rect) or bird_rect_ajustado.colliderect(self.bottom_rect):
             return True
         return False
     
     def draw(self, win):
-        pygame.draw.rect(win, (0, 255, 0), self.top_rect)
-        pygame.draw.rect(win, (0, 255, 0), self.bottom_rect)
+        pygame.draw.rect(win, (0, 200, 0), self.top_rect)
+        pygame.draw.rect(win, (0, 200, 0), self.bottom_rect)
+        pygame.draw.rect(win, (0, 80, 0), self.top_rect, 3)
+        pygame.draw.rect(win, (0, 80, 0), self.bottom_rect, 3)

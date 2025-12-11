@@ -19,7 +19,7 @@ def desenhar_cerebro_simplificado(win, brain, x, y):
         for h in range(cols):
             weight = brain.w_ih[i][h]
             cor = VERDE_NEON if weight > 0 else VERMELHO_NEON
-            width = 1 if abs(weight) < 0.5 else 2 
+            width = 1 if abs(weight) < 0.5 else 3 
             pygame.draw.line(win, cor, (layer_in_x, y_nodes[i]), (layer_hid_x, y + 20 + (h * 20)), width)
 
     rows, cols = brain.w_ho.shape

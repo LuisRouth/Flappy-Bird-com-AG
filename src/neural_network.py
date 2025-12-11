@@ -10,7 +10,6 @@ class Brain:
 
     def feed_forward(self, inputs):
         inputs = np.array(inputs).reshape(1, -1)
-        
         hidden = np.tanh(np.dot(inputs, self.w_ih) + self.bias_h)
         output = np.tanh(np.dot(hidden, self.w_ho) + self.bias_o)
         
@@ -20,9 +19,10 @@ class Brain:
 def decide_action(bird, pipes, screen_width, screen_height):
     closest_pipe = None
     closest_dist = float('inf')
+    
     for pipe in pipes:
         dist = pipe.x + 70 - bird.x
-        if 0 < dist < closest_dist:
+        if dist > -20 and dist < closest_dist:
             closest_pipe = pipe
             closest_dist = dist
             
@@ -30,10 +30,12 @@ def decide_action(bird, pipes, screen_width, screen_height):
         inputs = [
             bird.y / screen_height,
             closest_dist / screen_width,
-            closest_pipe.height / screen_height
+            closest_pipe.height / screen_height,
         ]
         
         prediction = bird.brain.feed_forward(inputs)
-        
         if prediction > 0.5:
             bird.jump()
+            return True
+            
+    return False

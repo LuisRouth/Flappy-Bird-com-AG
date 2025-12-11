@@ -63,25 +63,21 @@ def main():
     try:
         if os.path.exists("musica.mp3"):
             pygame.mixer.music.load("musica.mp3"); pygame.mixer.music.play(-1); pygame.mixer.music.set_volume(0.5)
-        
         if os.path.exists(caminho_imagem):
             img = pygame.image.load(caminho_imagem).convert_alpha()
             Bird.IMG = pygame.transform.scale(img, (34, 24))
         else: raise FileNotFoundError
         path_pipe_d = os.path.join("assets", "PipeD.png")
         path_pipe_u = os.path.join("assets", "PipeU.png")
-
         if os.path.exists(path_pipe_d) and os.path.exists(path_pipe_u):
             pipe_d_img = pygame.image.load(path_pipe_d).convert_alpha()
             pipe_u_img = pygame.image.load(path_pipe_u).convert_alpha()
             Pipe.IMG_BOTTOM = pygame.transform.scale(pipe_d_img, (70, 800))
             Pipe.IMG_TOP = pygame.transform.scale(pipe_u_img, (70, 800))
-            print("Imagens dos canos carregadas com sucesso!")
         else:
-            print("Aviso: Imagens dos canos não encontradas. Usando retângulos.")
-
-    except Exception as e:
-        print(f"Erro ao carregar assets: {e}")
+            print("Aviso: Imagens dos canos não encontradas.")
+            
+    except:
         s = pygame.Surface((34, 24))
         s.fill(CORES_SKIN[indice_skin])
         Bird.IMG = s
@@ -89,7 +85,7 @@ def main():
     ga = EvolutionManager(pop_size=TAMANHO_POPULACAO)
     birds = ga.create_population()
     saved_birds = []
-    pipes = [Pipe(750)] 
+    pipes = [Pipe(800)]
     
     score = 0
     velocidade_atual = VEL_CANOS
@@ -99,7 +95,6 @@ def main():
         bg = pygame.image.load(os.path.join("assets", "Background.png")).convert()
         bg = pygame.transform.scale(bg, (LARGURA_TELA, ALTURA_TELA))
     except: bg = None
-    
     music_on = True
     rect_botao_musica = None
 
@@ -129,7 +124,7 @@ def main():
         if len(birds) == 0:
             birds = ga.next_generation(saved_birds)
             saved_birds = []
-            pipes = [Pipe(750)]
+            pipes = [Pipe(800)]
             score = 0
             velocidade_atual = VEL_CANOS
 
@@ -137,7 +132,6 @@ def main():
         add_pipe = False
         for pipe in pipes:
             pipe.move(velocidade_atual)
-            
             if pipe.x + pipe.top_rect.width < 0: rem.append(pipe)
             if not pipe.passed and len(birds) > 0 and (pipe.x + 70) < birds[0].x:
                 pipe.passed = True
@@ -150,8 +144,7 @@ def main():
                 
             if score > recorde_canos: recorde_canos = score
             velocidade_atual = min(velocidade_atual + 0.5, 20)
-            
-            pipes.append(Pipe(750))
+            pipes.append(Pipe(800))
 
         for r in rem: pipes.remove(r)
 

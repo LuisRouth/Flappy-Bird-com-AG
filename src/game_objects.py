@@ -44,6 +44,9 @@ class Bird:
             pygame.draw.rect(win, (255, 0, 0), self.rect)
         
 class Pipe:
+    IMG_TOP = None
+    IMG_BOTTOM = None
+
     def __init__(self, x):
         self.x = x
         self.height = 0
@@ -66,10 +69,15 @@ class Pipe:
         self.bottom_rect.x = self.x
         
     def collide(self, bird):
-        if bird.rect.colliderect(self.top_rect) or bird.rect.colliderect(self.bottom_rect):
+        bird_mask = bird.rect.inflate(-2, -2)
+        if bird_mask.colliderect(self.top_rect) or bird_mask.colliderect(self.bottom_rect):
             return True
         return False
     
     def draw(self, win):
-        pygame.draw.rect(win, (0, 255, 0), self.top_rect)
-        pygame.draw.rect(win, (0, 255, 0), self.bottom_rect)
+        if Pipe.IMG_TOP and Pipe.IMG_BOTTOM:
+            win.blit(Pipe.IMG_TOP, (self.x, self.top_rect.height - Pipe.IMG_TOP.get_height()))
+            win.blit(Pipe.IMG_BOTTOM, (self.x, self.bottom_rect.y))
+        else:
+            pygame.draw.rect(win, (0, 255, 0), self.top_rect)
+            pygame.draw.rect(win, (0, 255, 0), self.bottom_rect)

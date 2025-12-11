@@ -93,24 +93,40 @@ def main():
     print(f"Iniciando simulação com skin: {nome_arquivo}")
     
     try:
-        pygame.mixer.music.load("musica.mp3")
-        pygame.mixer.music.play(-1)
-        pygame.mixer.music.set_volume(0.5)
-        print("Música iniciada.")
-        imagem_carregada = pygame.image.load(caminho_imagem).convert_alpha()
-        imagem_carregada = pygame.transform.scale(imagem_carregada, (34, 24))
+        # 1. Tenta carregar a música
+        if os.path.exists("musica.mp3"):
+            pygame.mixer.music.load("musica.mp3")
+            pygame.mixer.music.play(-1)
+            pygame.mixer.music.set_volume(0.5)
+            print("Música iniciada.")
+
+        # 2. Tenta carregar o Pássaro
+        if os.path.exists(caminho_imagem):
+            imagem_carregada = pygame.image.load(caminho_imagem).convert_alpha()
+            Bird.IMG = pygame.transform.scale(imagem_carregada, (34, 24))
+        else:
+            raise FileNotFoundError(f"Imagem não encontrada: {caminho_imagem}")
+
+        # 3. Tenta carregar os Canos (SEU CÓDIGO NOVO)
+        path_pipe_d = os.path.join("assets", "PipeD.png")
+        path_pipe_u = os.path.join("assets", "PipeU.png")
+
+        if os.path.exists(path_pipe_d) and os.path.exists(path_pipe_u):
+            pipe_d_img = pygame.image.load(path_pipe_d).convert_alpha()
+            pipe_u_img = pygame.image.load(path_pipe_u).convert_alpha()
+
+            Pipe.IMG_BOTTOM = pygame.transform.scale(pipe_d_img, (70, 800))
+            Pipe.IMG_TOP = pygame.transform.scale(pipe_u_img, (70, 800))
+            print("Imagens dos canos carregadas com sucesso!")
+        else:
+            print("Aviso: As imagens dos canos não foram encontradas. Usando retângulos...")
+
     except Exception as e:
-        print(f"Erro ao carregar música.mp3: {e}")
-        print(f"Erro ao carregar {caminho_imagem}: {e}")
-        imagem_carregada = pygame.Surface((34, 24))
-        imagem_carregada.fill(CORES_SKIN[indice_skin])
-        
-    Bird.IMG = imagem_carregada
-        img = pygame.image.load(caminho_imagem).convert_alpha()
-        Bird.IMG = pygame.transform.scale(img, (34, 24))
-    except Exception as e:
-        print(f"Erro ao carregar imagem {caminho_imagem}: {e}")
-        Bird.IMG = None
+        print(f"Erro ao carregar assets: {e}")
+        # Fallback para o pássaro (caso dê erro)
+        surface_fallback = pygame.Surface((34, 24))
+        surface_fallback.fill(CORES_SKIN[indice_skin])
+        Bird.IMG = surface_fallback
 
     ga = EvolutionManager(pop_size=50)
     birds = ga.create_population()

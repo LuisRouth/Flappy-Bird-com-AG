@@ -28,9 +28,9 @@ class Bird:
         self.tick_count += 1
         self.vel += GRAVIDADE
         if self.vel > 10:
-            self.vel = 10
-            
+            self.vel = 10    
         self.y += self.vel
+
         if self.vel < 0 or self.y < (self.height + 50):
             if self.tilt < 25:
                 self.tilt = 25
@@ -39,6 +39,7 @@ class Bird:
                 self.tilt -= 3
                 
         self.rect.y = int(self.y)
+        
         if self.y > ALTURA_TELA - 20 or self.y < 0:
             self.alive = False
             
@@ -51,6 +52,9 @@ class Bird:
             pygame.draw.rect(win, (255, 0, 0), self.rect)
         
 class Pipe:
+    IMG_TOP = None
+    IMG_BOTTOM = None
+
     def __init__(self, x):
         self.x = x
         self.height = 0
@@ -81,7 +85,12 @@ class Pipe:
         return False
     
     def draw(self, win):
-        pygame.draw.rect(win, (0, 200, 0), self.top_rect)
-        pygame.draw.rect(win, (0, 200, 0), self.bottom_rect)
-        pygame.draw.rect(win, (0, 70, 0), self.top_rect, 3)
-        pygame.draw.rect(win, (0, 70, 0), self.bottom_rect, 3)
+        if Pipe.IMG_TOP and Pipe.IMG_BOTTOM:
+            win.blit(Pipe.IMG_TOP, (self.x, self.height - Pipe.IMG_TOP.get_height()))
+
+            win.blit(Pipe.IMG_BOTTOM, (self.x, self.height + DIST_CANOS))
+        else:
+            pygame.draw.rect(win, (0, 200, 0), self.top_rect)
+            pygame.draw.rect(win, (0, 200, 0), self.bottom_rect)
+            pygame.draw.rect(win, (0, 70, 0), self.top_rect, 3)
+            pygame.draw.rect(win, (0, 70, 0), self.bottom_rect, 3)

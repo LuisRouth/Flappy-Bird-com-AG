@@ -132,8 +132,10 @@ def main():
                 b.fitness += 5 
                 
             if score > recorde_canos: recorde_canos = score
+            
             velocidade_atual = min(velocidade_atual + 0.5, 12)
-            pipes.append(Pipe(600))
+            
+            pipes.append(Pipe(800))
 
         for r in rem: pipes.remove(r)
 

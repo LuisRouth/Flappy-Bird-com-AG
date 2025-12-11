@@ -10,9 +10,10 @@ def desenhar_cerebro_simplificado(win, brain, x, y):
     layer_in_x = x + 20
     layer_hid_x = x + 120
     layer_out_x = x + 220 
-    y_nodes = [y, y+40, y+80]
     
-    labels = ["Y Pássaro", "Dist. Cano", "Y Buraco"]
+    y_nodes = [y, y+30, y+60, y+90, y+120]
+    
+    labels = ["Y Pássaro", "Dist. X", "Cano Cima", "Cano Baixo", "Velocidade"]
     
     rows, cols = brain.w_ih.shape
     for i in range(rows):
@@ -27,15 +28,15 @@ def desenhar_cerebro_simplificado(win, brain, x, y):
         weight = brain.w_ho[h][0]
         cor = VERDE_NEON if weight > 0 else VERMELHO_NEON
         width = 1 if abs(weight) < 0.5 else 3
-        pygame.draw.line(win, cor, (layer_hid_x, y + 20 + (h * 20)), (layer_out_x, y + 40), width)
+        pygame.draw.line(win, cor, (layer_hid_x, y + 20 + (h * 20)), (layer_out_x, y + 60), width)
 
-    for i in range(3):
+    for i in range(5):
         pygame.draw.circle(win, WHITE, (layer_in_x, y_nodes[i]), 5)
         text = FONTE_TEXTO.render(labels[i], 1, WHITE)
         win.blit(text, (layer_in_x, y_nodes[i] - 18))
 
-    pygame.draw.circle(win, WHITE, (layer_out_x, y + 40), 8)
-    win.blit(FONTE_TITULO.render("PULAR", 1, WHITE), (layer_out_x + 15, y + 30))
+    pygame.draw.circle(win, WHITE, (layer_out_x, y + 60), 8)
+    win.blit(FONTE_TITULO.render("PULAR", 1, WHITE), (layer_out_x + 15, y + 50))
 
 def draw_dashboard(win, bird, generation, alive_count, score, recorde, velocidade, music_on):
     rect_painel = pygame.Rect(LARGURA_TELA, 0, LARGURA_PAINEL, ALTURA_TELA)
@@ -62,7 +63,7 @@ def draw_dashboard(win, bird, generation, alive_count, score, recorde, velocidad
         win.blit(FONTE_TITULO.render("REDE NEURAL (LÍDER)", 1, AMARELO), (base_x + 40, cursor_y))
         cursor_y += 40
         desenhar_cerebro_simplificado(win, bird.brain, base_x, cursor_y)
-        cursor_y += 150 
+        cursor_y += 180 
         
         win.blit(FONTE_TEXTO.render("INTENÇÃO:", 1, WHITE), (base_x, cursor_y))
         cursor_y += 20
@@ -91,6 +92,7 @@ def draw_dashboard(win, bird, generation, alive_count, score, recorde, velocidad
     
     lbl = FONTE_TITULO.render(texto_btn, 1, (0,0,0))
     win.blit(lbl, (rect_music.centerx - lbl.get_width()//2, rect_music.centery - lbl.get_height()//2))
+    
     y_inst = ALTURA_TELA - 60
     pygame.draw.rect(win, (0,0,0), (base_x, y_inst - 5, LARGURA_PAINEL-20, 50)) 
     

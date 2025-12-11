@@ -1,4 +1,5 @@
 import numpy as np
+from src.config import DIST_CANOS
 
 class Brain:
     def __init__(self, n_inputs, n_hidden, n_output):
@@ -27,13 +28,19 @@ def decide_action(bird, pipes, screen_width, screen_height):
             closest_dist = dist
             
     if closest_pipe and bird.brain:
+        y_cano_cima = closest_pipe.height 
+        y_cano_baixo = closest_pipe.height + DIST_CANOS
+        
         inputs = [
             bird.y / screen_height,
             closest_dist / screen_width,
-            closest_pipe.height / screen_height,
+            y_cano_cima / screen_height,
+            y_cano_baixo / screen_height,
+            bird.vel / 10.0
         ]
         
         prediction = bird.brain.feed_forward(inputs)
+        
         if prediction > 0.5:
             bird.jump()
             return True

@@ -107,6 +107,7 @@ def main():
         surface_fallback = pygame.Surface((34, 24))
         surface_fallback.fill(CORES_SKIN[indice_skin])
         Bird.IMG = surface_fallback
+
     # ------------------------------------------
 
     ga = EvolutionManager(pop_size=50)
@@ -116,6 +117,10 @@ def main():
     pipes = [Pipe(600)]
     score = 0
     
+    
+    velocidade_atual = VEL_CANOS 
+    recorde_canos = 0
+
     bg_img = None
     try:
         caminho_bg = os.path.join("assets", "Background.png")
@@ -134,6 +139,15 @@ def main():
                 running = False
                 pygame.quit()
                 quit()
+            
+            # Passo 2: O Botão "Kill" (K)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_k:
+                    # Mata todos instantaneamente
+                    for bird in birds:
+                        bird.fitness -= 1 # Penalidade opcional
+                        saved_birds.append(bird)
+                    birds.clear() # Limpa lista de vivos
 
         if len(birds) == 0:
             print(f"Geração {ga.generation} extinta. Evoluindo...")
@@ -141,11 +155,14 @@ def main():
             saved_birds = []
             pipes = [Pipe(600)]
             score = 0
+            velocidade_atual = VEL_CANOS # Reseta velocidade na nova geração
 
         rem = []
         add_pipe = False
         for pipe in pipes:
-            pipe.move()
+            # Passo 1: Atualizar movimento com velocidade variável
+            pipe.move(velocidade_atual)
+            
             if pipe.x + pipe.top_rect.width < 0:
                 rem.append(pipe)
             if not pipe.passed and len(birds) > 0:
@@ -155,6 +172,14 @@ def main():
 
         if add_pipe:
             score += 1
+            # Passo 1: Lógica de Recorde e Aceleração
+            if score > recorde_canos:
+                recorde_canos = score
+            
+            velocidade_atual += 0.2
+            if velocidade_atual > 15:
+                velocidade_atual = 15
+                
             pipes.append(Pipe(600))
 
         for r in rem:
@@ -164,6 +189,7 @@ def main():
             bird.fitness += 0.1
             bird.move()
             decide_action(bird, pipes, LARGURA_TELA, ALTURA_TELA)
+        
         for i in range(len(birds) - 1, -1, -1):
             bird = birds[i]
             colidiu = False
@@ -192,10 +218,12 @@ def main():
         text_gen = font.render(f"Gen: {ga.generation}", 1, WHITE)
         text_alive = font.render(f"Vivos: {len(birds)}", 1, WHITE)
         text_score = font.render(f"Score: {score}", 1, WHITE)
+        text_record = font.render(f"Recorde: {recorde_canos}", 1, WHITE) # Opcional: Mostrar recorde
         
         win.blit(text_gen, (10, 10))
         win.blit(text_alive, (10, 50))
         win.blit(text_score, (10, 90))
+        win.blit(text_record, (10, 130))
 
         pygame.display.update()
 

@@ -60,8 +60,9 @@ class Pipe:
         self.top_rect = pygame.Rect(self.x, 0, 70, self.height)
         self.bottom_rect = pygame.Rect(self.x, self.height + DIST_CANOS, 70, ALTURA_TELA)
         
-    def move(self):
-        self.x -= VEL_CANOS
+    
+    def move(self, vel=VEL_CANOS):
+        self.x -= vel
         self.top_rect.x = self.x
         self.bottom_rect.x = self.x
         

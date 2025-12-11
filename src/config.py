@@ -1,26 +1,28 @@
 import pygame
 
-# Dimensões e FPS do jogo
 LARGURA_TELA = 500
 ALTURA_TELA = 800
+LARGURA_PAINEL = 300
+LARGURA_TOTAL = LARGURA_TELA + LARGURA_PAINEL
 FPS = 60
 
-DIST_CANOS = 200
-VEL_CANOS = 7
-FORC_PULO = -13.5
-GRAVIDADE = 2.0
+TAMANHO_POPULACAO = 50
 
-# Cores
+DIST_CANOS = 250
+VEL_CANOS = 5
+FORC_PULO = -18
+GRAVIDADE = 1.5
+
 WHITE = (255, 255, 255)
-COR_FUNDO = (135, 206, 235)
+COR_FUNDO = (110, 190, 210)
+
+COR_PAINEL = (40, 40, 40)
+VERDE_NEON = (0, 255, 0)
+VERMELHO_NEON = (255, 50, 50)
+AZUL_CLARO = (100, 200, 255)
+AMARELO = (255, 255, 0)
 
 CORES_SKIN = [
-    (0, 0, 255),        # Azul
-    (0, 255, 255),      # Ciano
-    (0, 255, 0),        # Verde
-    (255, 165, 0),      # Laranja
-    (255, 192, 203),    # Rosa
-    (128, 0, 128),      # Roxo
-    (255, 0, 0),        # Vermelho
-    (255, 255, 0)       # Amarelo
+    (0, 0, 255), (0, 255, 255), (0, 255, 0), (255, 165, 0),
+    (255, 192, 203), (128, 0, 128), (255, 0, 0), (255, 255, 0)
 ]

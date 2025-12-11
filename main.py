@@ -4,6 +4,7 @@ from src.config import *
 from src.game_objects import Pipe, Bird
 from src.neural_network import decide_action
 from src.genetic import EvolutionManager
+from src.dashboard import draw_dashboard
 
 def desenhar_botao(win, rect, cor_interna):
     pygame.draw.rect(win, (200, 200, 200), rect)
@@ -72,12 +73,10 @@ def main():
         pygame.mixer.init()
     except:
         print("Erro ao inicializar mixer de áudio.")
-
-    win = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
+    win = pygame.display.set_mode((LARGURA_TOTAL, ALTURA_TELA))
     pygame.display.set_caption("Flappy IA - Genetic Evolution")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("comicsans", 30)
-    
     indice_skin = tela_selecao(win, font)
     
     nomes_arquivos = [
@@ -89,7 +88,6 @@ def main():
     caminho_imagem = os.path.join("assets", "Birds", nome_arquivo)
     
     print(f"Iniciando simulação com skin: {nome_arquivo}")
-    
     try:
         if os.path.exists("musica.mp3"):
             pygame.mixer.music.load("musica.mp3")
@@ -107,20 +105,15 @@ def main():
         surface_fallback = pygame.Surface((34, 24))
         surface_fallback.fill(CORES_SKIN[indice_skin])
         Bird.IMG = surface_fallback
-
-    # ------------------------------------------
-
     ga = EvolutionManager(pop_size=50)
     birds = ga.create_population()
     saved_birds = []
     
     pipes = [Pipe(600)]
     score = 0
-    
-    
-    velocidade_atual = VEL_CANOS 
+    velocidade_atual = VEL_CANOS
     recorde_canos = 0
-
+    
     bg_img = None
     try:
         caminho_bg = os.path.join("assets", "Background.png")
@@ -140,14 +133,12 @@ def main():
                 pygame.quit()
                 quit()
             
-            # Passo 2: O Botão "Kill" (K)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_k:
-                    # Mata todos instantaneamente
                     for bird in birds:
-                        bird.fitness -= 1 # Penalidade opcional
+                        bird.fitness -= 1
                         saved_birds.append(bird)
-                    birds.clear() # Limpa lista de vivos
+                    birds.clear()
 
         if len(birds) == 0:
             print(f"Geração {ga.generation} extinta. Evoluindo...")
@@ -155,12 +146,11 @@ def main():
             saved_birds = []
             pipes = [Pipe(600)]
             score = 0
-            velocidade_atual = VEL_CANOS # Reseta velocidade na nova geração
+            velocidade_atual = VEL_CANOS
 
         rem = []
         add_pipe = False
         for pipe in pipes:
-            # Passo 1: Atualizar movimento com velocidade variável
             pipe.move(velocidade_atual)
             
             if pipe.x + pipe.top_rect.width < 0:
@@ -172,7 +162,6 @@ def main():
 
         if add_pipe:
             score += 1
-            # Passo 1: Lógica de Recorde e Aceleração
             if score > recorde_canos:
                 recorde_canos = score
             
@@ -203,27 +192,20 @@ def main():
                 bird.fitness -= 1
                 saved_birds.append(bird)
                 birds.pop(i)
-
+        win.fill(COR_PAINEL)
+        
         if bg_img:
             win.blit(bg_img, (0,0))
         else:
-            win.fill(COR_FUNDO)
+            pygame.draw.rect(win, COR_FUNDO, (0, 0, LARGURA_TELA, ALTURA_TELA))
 
         for pipe in pipes:
             pipe.draw(win)
             
         for bird in birds:
             bird.draw(win)
-            
-        text_gen = font.render(f"Gen: {ga.generation}", 1, WHITE)
-        text_alive = font.render(f"Vivos: {len(birds)}", 1, WHITE)
-        text_score = font.render(f"Score: {score}", 1, WHITE)
-        text_record = font.render(f"Recorde: {recorde_canos}", 1, WHITE) # Opcional: Mostrar recorde
-        
-        win.blit(text_gen, (10, 10))
-        win.blit(text_alive, (10, 50))
-        win.blit(text_score, (10, 90))
-        win.blit(text_record, (10, 130))
+        best_bird = birds[0] if len(birds) > 0 else None
+        draw_dashboard(win, best_bird, ga.generation, len(birds), score)
 
         pygame.display.update()
 

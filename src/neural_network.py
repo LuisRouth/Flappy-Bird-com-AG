@@ -6,15 +6,16 @@ class Brain:
         self.w_ho = np.random.uniform(-1, 1, (n_hidden, n_output))
         self.bias_h = np.random.uniform(-1, 1, (1, n_hidden))
         self.bias_o = np.random.uniform(-1, 1, (1, n_output))
+        self.last_output = 0 
 
     def feed_forward(self, inputs):
         inputs = np.array(inputs).reshape(1, -1)
         
         hidden = np.tanh(np.dot(inputs, self.w_ih) + self.bias_h)
-        
         output = np.tanh(np.dot(hidden, self.w_ho) + self.bias_o)
         
-        return output[0][0]
+        self.last_output = output[0][0]
+        return self.last_output
 
 def decide_action(bird, pipes, screen_width, screen_height):
     closest_pipe = None
